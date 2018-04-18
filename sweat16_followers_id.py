@@ -13,6 +13,12 @@ member_followers = []
 color = []
 labels = {}
 
+def freeman_network_centrality(G,max_deg,max_node):
+	sum_c = 0
+	for n, d in G.degree():
+		sum_c = sum_c + ( max_deg - d )
+	return sum_c / ((max_node - 1) * (max_node - 2))
+
 def degree_centrality(G):
 	centrality = {}
 	s = 1.0 / (len(G) - 1.0)
@@ -33,14 +39,21 @@ for item in content:
 G = nx.DiGraph()
 G.add_nodes_from(members)
 
+max_deg = 0
+
 follower_nodes = []
 mmm = 13
 for k in range(mmm):
+	cnt = 0
 	for i in member_followers[k]:
 		G.add_node(i)
 		G.add_edge(i,members[k])
 		follower_nodes.append(i)
+		cnt = cnt + 1
+	if (cnt > max_deg) :
+		max_deg = cnt
 
+max_node = len(G.nodes())
 
 for node in G.nodes():
 	if node in members:
@@ -52,8 +65,10 @@ nx.draw_networkx_nodes(G,pos,nodelist=members)
 nx.draw_networkx_edges(G,pos)
 nx.draw_networkx_labels(G,pos,labels,font_size=10,font_color = "yellow", node_size=200)
 deg_c = degree_centrality(G)
+cdG = freeman_network_centrality(G,max_deg,max_node)
+print(cdG)
 with open('centrality.csv', 'w', newline='') as csvfile:
-	fieldnames = ['name', 'degree centrality']
+	fieldnames = ['name', 'degree centrality', 'freeman_network_centrality']
 	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 	writer.writeheader()
 
@@ -63,6 +78,7 @@ with open('centrality.csv', 'w', newline='') as csvfile:
 		deg_cen_dict[i] = float(deg_c[i])
 		dict_for_write['name'] = i
 		dict_for_write['degree centrality'] = deg_cen_dict[i]
+		dict_for_write['freeman_network_centrality'] = cdG
 		writer.writerow(dict_for_write)
 	pp.pprint(deg_cen_dict)
 
