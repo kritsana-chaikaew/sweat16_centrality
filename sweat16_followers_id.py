@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pprint as pp
 import json
+import csv
 
 with open('sweat16_followers_id.json') as f:
 	content = f.readlines()
@@ -51,9 +52,20 @@ nx.draw_networkx_nodes(G,pos,nodelist=members)
 nx.draw_networkx_edges(G,pos)
 nx.draw_networkx_labels(G,pos,labels,font_size=10,font_color = "yellow", node_size=200)
 deg_c = degree_centrality(G)
-with open('data.json', 'w') as outfile:
-	json.dump(deg_c, outfile)
-pp.pprint(deg_c)
+with open('centrality.csv', 'w', newline='') as csvfile:
+	fieldnames = ['name', 'degree centrality']
+	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+	writer.writeheader()
+
+	deg_cen_dict = {}
+	dict_for_write = {}
+	for i in members:
+		deg_cen_dict[i] = float(deg_c[i])
+		dict_for_write['name'] = i
+		dict_for_write['degree centrality'] = deg_cen_dict[i]
+		writer.writerow(dict_for_write)
+	pp.pprint(deg_cen_dict)
+
 plt.axis('off')
 plt.savefig("Graph2.png", format="PNG")
 # plt.draw()
